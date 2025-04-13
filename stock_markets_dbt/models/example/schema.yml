@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stock_stg
+    description: "Stock staging"
+    columns:
+      - name: ticker
+        description: "Ticker"
+        data_tests:
+          - not_null
+      - name: trade_date
+        description: "Trading date"
+        data_tests:
+          - not_null
+      - name: Open
+        description: "The first price the stock traded at when the market opened today"
+        data_tests:
+          - not_null
+      - name: High
+        description: "The highest value"
+        data_tests:
+          - not_null
+      - name: Low
+        description: "The lowest value"
+        data_tests:
+          - not_null
+      - name: Close
+        description: "The last traded price from the previous trading day"
+        data_tests:
+          - not_null
+      - name: Volume
+        description: "Number of shares traded today (indicates activity & liquidity)"
+        data_tests:
+          - not_null

@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: postgres
+    description: "Raw data from the destination PostgreSQL database."
+    database: postgres
+    schema: public
+    tables:
+      - name: yahoo_finance
+        description: "History of AAPL"
