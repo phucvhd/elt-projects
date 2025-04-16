@@ -12,38 +12,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
 
-  # elt_script:
-  #   build:
-  #     context: ./elt_script # Directory containing the Dockerfile and elt_script.py
-  #     dockerfile: Dockerfile # Name of the Dockerfile, if it's something other than "Dockerfile", specify here
-  #   command: [ "python", "elt_script.py" ]
-  #   networks:
-  #     - elt_network
-  #   depends_on:
-  #     - yahoo_finance_postgres
-
-  # dbt:
-  #   image: ghcr.io/dbt-labs/dbt-postgres:1.4.7
-  #   command:
-  #     [
-  #       "run",
-  #       "--profiles-dir",
-  #       "/root",
-  #       "--project-dir",
-  #       "/dbt",
-  #       "--full-refresh"
-  #     ]
-  #   networks:
-  #     - elt_network
-  #   volumes:
-  #     - ./stock_markets_dbt:/dbt
-  #     - ~/.dbt:/root
-  #   depends_on:
-  #     - elt_script
-  #   environment:
-  #     DBT_PROFILE: default
-  #     DBT_TARGET: dev
-
   postgres: # This is the PostgreSQL database for Airflow, storing the metadata
     image: postgres:latest
     networks:
