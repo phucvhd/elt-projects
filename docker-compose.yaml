@@ -12,38 +12,127 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
 
-  elt_script:
-    build:
-      context: ./elt_script # Directory containing the Dockerfile and elt_script.py
-      dockerfile: Dockerfile # Name of the Dockerfile, if it's something other than "Dockerfile", specify here
-    command: [ "python", "elt_script.py" ]
-    networks:
-      - elt_network
-    depends_on:
-      - yahoo_finance_postgres
+  # elt_script:
+  #   build:
+  #     context: ./elt_script # Directory containing the Dockerfile and elt_script.py
+  #     dockerfile: Dockerfile # Name of the Dockerfile, if it's something other than "Dockerfile", specify here
+  #   command: [ "python", "elt_script.py" ]
+  #   networks:
+  #     - elt_network
+  #   depends_on:
+  #     - yahoo_finance_postgres
 
-  dbt:
-    image: ghcr.io/dbt-labs/dbt-postgres:1.4.7
-    command:
-      [
-        "run",
-        "--profiles-dir",
-        "/root",
-        "--project-dir",
-        "/dbt",
-        "--full-refresh"
-      ]
+  # dbt:
+  #   image: ghcr.io/dbt-labs/dbt-postgres:1.4.7
+  #   command:
+  #     [
+  #       "run",
+  #       "--profiles-dir",
+  #       "/root",
+  #       "--project-dir",
+  #       "/dbt",
+  #       "--full-refresh"
+  #     ]
+  #   networks:
+  #     - elt_network
+  #   volumes:
+  #     - ./stock_markets_dbt:/dbt
+  #     - ~/.dbt:/root
+  #   depends_on:
+  #     - elt_script
+  #   environment:
+  #     DBT_PROFILE: default
+  #     DBT_TARGET: dev
+
+  postgres: # This is the PostgreSQL database for Airflow, storing the metadata
+    image: postgres:latest
     networks:
       - elt_network
-    volumes:
-      - ./stock_markets_dbt:/dbt
-      - ~/.dbt:/root
-    depends_on:
-      - elt_script
     environment:
-      DBT_PROFILE: default
-      DBT_TARGET: dev
-      
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+
+  init-airflow:
+    image: apache/airflow:latest
+    depends_on:
+      - postgres
+    networks:
+      - elt_network
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+    command: >
+      bash -c "airflow db init && 
+               airflow users create --username airflow --password password --firstname Steve --lastname Vu --role Admin --email stevevu@example.com"
+
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: root
+    depends_on:
+      - postgres
+    networks:
+      - elt_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./elt_script:/opt/airflow/elt_script
+      - ./stock_markets_dbt:/opt/dbt
+      - ~/.dbt:/root/.dbt
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW_CONN_DESTINATION_POSTGRES=postgres://postgres:password@yahoo_finance_postgres:5434/yahoo_finance_db
+      - AIRFLOW__CORE__FERNET_KEY=plIipb9RU3-3wJ1UNaAtqVNJrqFEks1-dGbJM34EW7U=
+      - AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME=airflow
+      - AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD=password
+      - AIRFLOW_WWW_USER_USERNAME=airflow
+      - AIRFLOW_WWW_USER_PASSWORD=password
+      - AIRFLOW__WEBSERVER__SECRET_KEY=secret
+      - AIRFLOW__LOGGING__REMOTE_LOGGING=False
+      - AIRFLOW__LOGGING__BASE_LOG_FOLDER=/opt/airflow/logs
+    ports:
+      - "8080:8080"
+    command: webserver
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: root
+    depends_on:
+      - postgres
+    networks:
+      - elt_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./elt_script:/opt/airflow/elt_script
+      - ./stock_markets_dbt:/opt/dbt
+      - ~/.dbt:/root/.dbt
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW_CONN_DESTINATION_POSTGRES=postgres://postgres:password@yahoo_finance_postgres:5434/yahoo_finance_db
+      - AIRFLOW__CORE__FERNET_KEY=plIipb9RU3-3wJ1UNaAtqVNJrqFEks1-dGbJM34EW7U=
+      - AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME=airflow
+      - AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD=password
+      - AIRFLOW_WWW_USER_USERNAME=airflow
+      - AIRFLOW_WWW_USER_PASSWORD=password
+      - AIRFLOW__WEBSERVER__SECRET_KEY=secret
+      - AIRFLOW__LOGGING__REMOTE_LOGGING=False
+      - AIRFLOW__LOGGING__BASE_LOG_FOLDER=/opt/airflow/logs
+    command: scheduler
+
 networks:
   elt_network:
     driver: bridge
