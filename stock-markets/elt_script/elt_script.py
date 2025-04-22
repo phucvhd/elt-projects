@@ -1,4 +1,3 @@
-import subprocess
 import yahoo_finance
 
 # Configuration for the destination PostgreSQL database
