@@ -25,11 +25,6 @@ yt_client = YoutubeApiClient(api_key=api_key,
 
 # Extract data
 responses = yt_client.get_trending_videos(chart="mostPopular")
-if responses:
-        for video in responses["items"]:
-            title = video["snippet"]["title"]
-            views = video["statistics"].get("viewCount", "N/A")
-            print(f"{title} - {views} views")
 
 # Load data
 try:
