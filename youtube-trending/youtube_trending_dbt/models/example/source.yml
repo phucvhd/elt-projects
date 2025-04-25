@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: youtube_trending_db
+    description: "Raw data from the destination PostgreSQL database."
+    database: postgres
+    schema: public
+    tables:
+      - name: raw_youtube_trending
+        description: "Raw response from Youtube Data V3"
