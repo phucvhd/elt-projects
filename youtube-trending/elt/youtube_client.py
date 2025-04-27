@@ -45,3 +45,21 @@ class YoutubeApiClient:
             print(f"Error from get_video_categories: {response.status_code}")
             print(response.text)
             return None
+
+    def get_channel_info(self, channel_ids: []):
+        params = {
+            "part": "snippet",
+            "id": channel_ids,
+            "key": self.api_key
+        }
+        response = requests.get(self.base_url + "channels", params=params)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            if response.status_code == 429:
+                print("Rate limit hit, sleeping...")
+                time.sleep(60)  # or longer depending on your quota window
+            print(f"Error from get_channel_info: {response.status_code}")
+            print(response.text)
+            return None
