@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     op.create_table("raw_youtube_trending",
-                    sa.Column('id', sa.Integer, primary_key=True),
+                    sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
                     sa.Column('raw_json', sa.JSON, nullable=False),
                     sa.Column('fetch_timestamp', sa.TIMESTAMP, server_default=func.now()))
     pass
