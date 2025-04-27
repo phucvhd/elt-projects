@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: video_stats
+    description: "Basic information of video model"
+    columns:
+      - name: video_id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+      - name: title
+        description: "The title of the video"
+        data_tests:
+          - not_null
+      - name: description
+        description: "Short description of the video"
+        data_tests:
+          - not_null
+      - name: category_id
+        description: "The foreign key to video category lookup"
+        data_tests:
+          - not_null
+      - name: channel_id
+        description: "The foreign key to channel info"
+        data_tests:
+          - not_null
+      - name: published_at
+        description: "Publishing time of the video"
+        data_tests:
+          - not_null
+      - name: trending_date
+        description: "Trending date of the video"
+        data_tests:
+          - not_null
+      - name: view_count
+        description: "The number of views"
+        data_tests:
+          - not_null
+      - name: like_count
+        description: "The number of likes"
+        data_tests:
+          - not_null
+      - name: comment_count
+        description: "The number of comments"
+        data_tests:
+          - not_null
