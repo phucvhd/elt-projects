@@ -38,13 +38,11 @@ try:
         conn.commit()
     print(f"✅ Data raw_youtube_trending loaded successfully into '{dbname}'")
 except Exception as e:
-    print("❌ Failed to load data:", e)
+    print("❌ Failed to load raw_youtube_trending data:", e)
 
 # Load video_categories
 try:
     engine = create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{dbname}')
-    # if engine.dialect.has_table(engine.connect(), "video_categories_lookup"):
-    #     print("Table exists!")
     metadata = MetaData()
     video_categories_lookup_table = Table("video_categories_lookup", metadata, autoload_with=engine)
     with engine.connect() as conn:
@@ -58,4 +56,39 @@ try:
         conn.commit()
     print(f"✅ Data video_categories_lookup loaded successfully into '{dbname}'")
 except Exception as e:
-    print("❌ Failed to load data:", e)
+    print("❌ Failed to load video_categories_lookup data:", e)
+
+# Load Channel Info
+def extract_channel_id(videos):
+    channel_ids = []
+    try:
+        for item in videos.get("items", []):
+            channel_id = item["snippet"]["channelId"]
+            channel_ids.append(channel_id)
+        return channel_ids
+    except Exception as e:
+        print("❌ Failed to load data:", e)
+
+channel_ids = extract_channel_id(trending_videos_response)
+channel_info_response = yt_client.get_channel_info(channel_ids)
+try:
+    engine = create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{dbname}')
+    metadata = MetaData()
+    channel_info_table = Table("channel_info", metadata, autoload_with=engine)
+    with engine.connect() as conn:
+        for item in channel_info_response.get("items", []):
+            stmt = insert(channel_info_table).values(channel_title=item["snippet"]["title"],
+                                                     channel_id=item["id"],
+                                                     country=item["snippet"].get("country", "undefined"),
+                                                     published_at=item["snippet"]["publishedAt"])
+            stmt = stmt.on_conflict_do_update(
+                index_elements=["channel_id"],
+                set_={"channel_title": item["snippet"]["title"],
+                      "country": item["snippet"].get("country", "undefined"),
+                      "published_at": item["snippet"]["publishedAt"]}
+            )
+            conn.execute(stmt)
+        conn.commit()
+    print(f"✅ Data channel_info loaded successfully into '{dbname}'")
+except Exception as e:
+    print("❌ Failed to load channel_info data:", e.with_traceback())
