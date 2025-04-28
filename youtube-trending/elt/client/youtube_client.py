@@ -6,10 +6,10 @@ from config.config import Config
 
 class YoutubeApiClient:
     def __init__(self, config: Config):
-        self.api_key = config.api_key
-        self.region_code = config.region_code
-        self.max_results = config.max_results
-        self.base_url = config.base_url
+        self.api_key = config.API_KEY
+        self.region_code = config.REGION_CODE
+        self.max_results = config.MAX_RESULTS
+        self.base_url = config.BSE_URL
 
     def get_trending_videos(self, chart: str):
         params = {

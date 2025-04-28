@@ -6,9 +6,9 @@ from config.config import Config
 class Repository:
     @abstractmethod
     def __init__(self, config: Config):
-        self.username = config.username
-        self.password = config.password
-        self.host = config.host
-        self.port = config.port
-        self.dbname = config.dbname
-        self.POSTGRES_ENGINE_URL = f'postgresql+psycopg2://{config.username}:{config.password}@{config.host}:{config.port}/{config.dbname}'
+        self.username = config.USERNAME
+        self.password = config.PASSWORD
+        self.host = config.HOST
+        self.port = config.PORT
+        self.dbname = config.DBNAME
+        self.POSTGRES_ENGINE_URL = f'postgresql+psycopg2://{config.USERNAME}:{config.PASSWORD}@{config.HOST}:{config.PORT}/{config.DBNAME}'

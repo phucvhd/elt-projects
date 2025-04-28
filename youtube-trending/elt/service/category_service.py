@@ -13,4 +13,5 @@ class CategoryService:
         return self.yt_client.get_video_categories()
 
     def load_video_categories(self, video_categories_response):
+        print("Starting to load video categories into database")
         return self.category_repository.load_video_categories(video_categories_response)
