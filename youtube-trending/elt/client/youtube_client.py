@@ -1,12 +1,15 @@
 import requests
 import time
 
+from config.config import Config
+
+
 class YoutubeApiClient:
-    def __init__(self, api_key: str, region_code: str, max_results: int, base_url: str):
-        self.api_key = api_key
-        self.region_code = region_code
-        self.max_results = max_results
-        self.base_url = base_url
+    def __init__(self, config: Config):
+        self.api_key = config.api_key
+        self.region_code = config.region_code
+        self.max_results = config.max_results
+        self.base_url = config.base_url
 
     def get_trending_videos(self, chart: str):
         params = {
