@@ -1,8 +1,8 @@
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import create_engine, Table, MetaData
 from sqlalchemy.dialects.postgresql import insert
 
-from config.config import Config
-from repository.repository import Repository
+from elt.config.config import Config
+from elt.repository.repository import Repository
 
 
 class VideoRepository(Repository):
@@ -17,7 +17,6 @@ class VideoRepository(Repository):
             with engine.connect() as conn:
                 stmt = insert(raw_youtube_trending_table).values(raw_json=trending_videos_response)
                 conn.execute(stmt)
-                conn.commit()
             print(f"✅ Data raw_youtube_trending loaded successfully into '{self.dbname}'")
         except Exception as e:
             print("❌ Failed to load raw_youtube_trending data:", e)
@@ -41,7 +40,6 @@ class VideoRepository(Repository):
                               "published_at": item["snippet"]["publishedAt"]}
                     )
                     conn.execute(stmt)
-                conn.commit()
             print(f"✅ Data channel_info loaded successfully into '{self.dbname}'")
         except Exception as e:
             print("❌ Failed to load channel_info data:", e)

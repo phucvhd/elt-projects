@@ -1,7 +1,9 @@
-from config.config import Config
-from repository.repository import Repository
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.dialects.postgresql import insert
+
+from elt.config.config import Config
+from elt.repository.repository import Repository
+
 
 class CategoryRepository(Repository):
     def __init__(self, config: Config):
@@ -21,7 +23,6 @@ class CategoryRepository(Repository):
                         set_={"category_name": item["snippet"]["title"]}
                     )
                     conn.execute(stmt)
-                conn.commit()
             print(f"✅ Data video_categories_lookup loaded successfully into '{self.dbname}'")
         except Exception as e:
             print("❌ Failed to load video_categories_lookup data:", e)

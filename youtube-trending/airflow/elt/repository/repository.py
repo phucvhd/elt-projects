@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from config.config import Config
+from elt.config.config import Config
 
 
 class Repository:

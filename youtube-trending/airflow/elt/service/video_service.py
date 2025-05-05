@@ -1,6 +1,6 @@
-from client.youtube_client import YoutubeApiClient
-from config.config import Config
-from repository.video_repository import VideoRepository
+from elt.client.youtube_client import YoutubeApiClient
+from elt.config.config import Config
+from elt.repository.video_repository import VideoRepository
 
 
 def extract_channel_id(videos):

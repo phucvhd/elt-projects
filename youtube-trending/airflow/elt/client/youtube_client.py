@@ -1,7 +1,7 @@
 import requests
 import time
 
-from config.config import Config
+from elt.config.config import Config
 
 
 class YoutubeApiClient:

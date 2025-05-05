@@ -1,6 +1,6 @@
-from client.youtube_client import YoutubeApiClient
-from config.config import Config
-from repository.category_repository import CategoryRepository
+from elt.client.youtube_client import YoutubeApiClient
+from elt.config.config import Config
+from elt.repository.category_repository import CategoryRepository
 
 
 class CategoryService:
