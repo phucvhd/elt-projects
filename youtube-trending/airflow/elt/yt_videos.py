@@ -34,6 +34,3 @@ def elt_video_categories():
 def elt_channel_infos(trending_videos_response): # Should load from raw table
     channel_info_response = video_service.extract_channel_infos(trending_videos_response)
     video_service.load_channel_info(channel_info_response)
-
-
-elt_trending_video()
