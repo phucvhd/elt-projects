@@ -7,7 +7,102 @@ services:
     restart: always
     ports:
       - "5432:5432"
+    networks:
+      - yt_elt_network
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  airflow-postgres: # This is the PostgreSQL database for Airflow, storing the metadata
+    image: postgres:latest
+    networks:
+      - yt_elt_network
+    environment:
+      POSTGRES_USER: ${AIRFLOW_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_PASSWORD}
+      POSTGRES_DB: ${AIRFLOW_DB}
+
+  init-airflow:
+    image: apache/airflow:latest
+    depends_on:
+      - airflow-postgres
+    networks:
+      - yt_elt_network
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@airflow-postgres/${AIRFLOW_DB}
+    command: >
+      bash -c "airflow db init && 
+               airflow users create --username airflow --password password --firstname Steve --lastname Vu --role Admin --email phucvhd@gmail.com"
+
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: root
+    depends_on:
+      - airflow-postgres
+    networks:
+      - yt_elt_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    volumes:
+      - ./airflow:/opt/airflow
+#      - ~/.dbt:/root/.dbt
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      LOAD_EX: n
+      EXECUTOR: Local
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@airflow-postgres/${AIRFLOW_DB}
+      AIRFLOW_CONN_DESTINATION_POSTGRES: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@youtube_trending_postgres:5432/${POSTGRES_DB}
+      AIRFLOW__CORE__FERNET_KEY: plIipb9RU3-3wJ1UNaAtqVNJrqFEks1-dGbJM34EW7U=
+      AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME: ${AIRFLOW_USER}
+      AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD: ${AIRFLOW_PASSWORD}
+      AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_USER}
+      AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_PASSWORD}
+      AIRFLOW__WEBSERVER__SECRET_KEY: secret
+      AIRFLOW__LOGGING__REMOTE_LOGGING: False
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+    ports:
+      - "8080:8080"
+    command: webserver
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: root
+    depends_on:
+      - airflow-postgres
+    networks:
+      - yt_elt_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    volumes:
+      - ./airflow:/opt/airflow
+        #      - ~/.dbt:/root/.dbt
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      LOAD_EX: n
+      EXECUTOR: Local
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@airflow-postgres/${AIRFLOW_DB}
+      AIRFLOW_CONN_DESTINATION_POSTGRES: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@youtube_trending_postgres:5432/${POSTGRES_DB}
+      AIRFLOW__CORE__FERNET_KEY: plIipb9RU3-3wJ1UNaAtqVNJrqFEks1-dGbJM34EW7U=
+      AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME: ${AIRFLOW_USER}
+      AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD: ${AIRFLOW_PASSWORD}
+      AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_USER}
+      AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_PASSWORD}
+      AIRFLOW__WEBSERVER__SECRET_KEY: secret
+      AIRFLOW__LOGGING__REMOTE_LOGGING: False
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+    command: scheduler
+
+networks:
+  yt_elt_network:
+    driver: bridge
