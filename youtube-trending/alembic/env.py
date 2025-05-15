@@ -19,7 +19,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 #[Begin] Declare models base
-from models.yt_base_models import Base
+from airflow.elt.models.yt_base_models import Base
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

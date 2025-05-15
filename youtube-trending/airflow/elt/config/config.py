@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 
 
 class Config:
-    load_dotenv()
+    profile = os.getenv("ENV_PROFILE", "env")
+    load_dotenv(profile)
     API_KEY = os.getenv("GOOGLE_API_KEY")
     BSE_URL = os.getenv("GOOGLE_DATA_V3_URL")
     MAX_RESULTS = os.getenv("MAX_RESULT", 300)

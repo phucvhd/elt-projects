@@ -15,10 +15,15 @@ def elt_trending_video():
     try:
         trending_videos_response = video_service.extract_trending_videos()
         video_service.load_trending_videos(trending_videos_response)
+
+        channel_info_response = video_service.extract_channel_infos(trending_videos_response)
+        video_service.load_channel_info(channel_info_response)
+
+        video_service.transform_video_stats(trending_videos_response)
         print("Ending elt_trending_video .....")
     except Exception as e:
         print(f"Error at elt_trending_video: ", e)
-
+        exit(1)
 
 # Extract and Load video_categories
 def elt_video_categories():
@@ -29,8 +34,4 @@ def elt_video_categories():
         print("Ending elt_video_categories .....")
     except Exception as e:
         print(f"Error at elt_video_categories: ", e)
-
-# Extract and Load channel infos
-def elt_channel_infos(trending_videos_response): # Should load from raw table
-    channel_info_response = video_service.extract_channel_infos(trending_videos_response)
-    video_service.load_channel_info(channel_info_response)
+        exit(1)

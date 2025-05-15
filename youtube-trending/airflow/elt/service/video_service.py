@@ -21,9 +21,11 @@ class VideoService:
         self.video_repository = VideoRepository(config)
 
     def extract_trending_videos(self):
+        print("Extracting trending videos")
         return self.yt_client.get_trending_videos(chart="mostPopular")
 
     def extract_channel_infos(self, trending_videos_response):
+        print("Extracting channel infos")
         channel_ids = extract_channel_id(trending_videos_response)
         return self.yt_client.get_channel_info(channel_ids)
 
@@ -34,3 +36,7 @@ class VideoService:
     def load_channel_info(self, channel_info_response):
         print("Starting to load channel infos into database")
         self.video_repository.load_channel_info(channel_info_response)
+
+    def transform_video_stats(self, trending_videos_response):
+        print("Starting to transform trending_videos_response to video stats")
+        self.video_repository.transform_video_stats(trending_videos_response)

@@ -1,5 +1,8 @@
 from abc import abstractmethod
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
 from elt.config.config import Config
 
 
@@ -12,3 +15,5 @@ class Repository:
         self.port = config.PORT
         self.dbname = config.DBNAME
         self.POSTGRES_ENGINE_URL = f'postgresql+psycopg2://{config.USERNAME}:{config.PASSWORD}@{config.HOST}:{config.PORT}/{config.DBNAME}'
+        self.engine = create_engine(self.POSTGRES_ENGINE_URL)
+        self.session = Session(self.engine)
