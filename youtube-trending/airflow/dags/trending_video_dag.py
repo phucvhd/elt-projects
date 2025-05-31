@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime
 
 from airflow.providers.standard.operators.python import PythonOperator
@@ -12,6 +13,9 @@ default_args = {
     'email_on_retry': False,
 }
 
+def fail_task():
+    sys.exit(1)
+
 dag = DAG(
     'elt_and_dbt',
     default_args=default_args,
@@ -21,14 +25,14 @@ dag = DAG(
 )
 
 t1 = PythonOperator(
-    task_id='elt_trending_video',
-    python_callable=elt_trending_video,
+    task_id='elt_video_categories',
+    python_callable=elt_video_categories,
     dag=dag,
 )
 
 t2 = PythonOperator(
-    task_id='elt_video_categories',
-    python_callable=elt_video_categories,
+    task_id='elt_trending_video',
+    python_callable=elt_trending_video,
     dag=dag,
 )
 
