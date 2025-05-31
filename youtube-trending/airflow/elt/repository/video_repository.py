@@ -52,8 +52,8 @@ class VideoRepository(Repository):
                                         'category_id': item['snippet']['categoryId'],
                                         'channel_id': item['snippet']['channelId'],
                                         'published_at': item['snippet']['publishedAt'],
-                                        'view_count': item['statistics']['viewCount'],
-                                        'like_count': item['statistics']['likeCount'],
+                                        'view_count': item['statistics']['viewCount'] if 'viewCount' in item['statistics'] else 0,
+                                        'like_count': item['statistics']['likeCount'] if 'likeCount' in item['statistics'] else 0,
                                         'comment_count': item['statistics']['commentCount'] if 'commentCount' in item['statistics'] else 0
                         }
                         stmt = insert(VideoStats).values(**video_stat)
