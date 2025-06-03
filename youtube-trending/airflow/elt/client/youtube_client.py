@@ -49,7 +49,7 @@ class YoutubeApiClient:
             print(response.text)
             return None
 
-    def get_channel_info(self, channel_ids: []):
+    def get_channel_info(self, channel_ids: []) -> dict | None:
         params = {
             "part": "snippet",
             "id": channel_ids,
