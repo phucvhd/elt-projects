@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 import pytest
@@ -8,7 +7,6 @@ from sqlalchemy.orm import sessionmaker
 from elt.config.config import Config
 from elt.models.yt_base_models import Base, ChannelInfo, VideoStats
 from elt.repository.video_repository import VideoRepository
-from elt.service.video_service import VideoService
 
 config = Config("test")
 

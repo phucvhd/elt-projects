@@ -1,15 +1,10 @@
-import os
-from datetime import datetime
-
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from elt.config.config import Config
-from elt.models.yt_base_models import Base, ChannelInfo, VideoStats, VideoCategory
+from elt.models.yt_base_models import Base, VideoCategory
 from elt.repository.category_repository import CategoryRepository
-from elt.repository.video_repository import VideoRepository
-from elt.service.video_service import VideoService
 
 config = Config("test")
 
