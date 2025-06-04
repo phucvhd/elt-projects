@@ -11,7 +11,6 @@ from elt.repository.video_repository import VideoRepository
 from elt.service.video_service import VideoService
 
 config = Config("test")
-video_service = VideoService(config)
 
 @pytest.fixture
 def session():
@@ -82,4 +81,4 @@ def test_load_video_stats_pass(caplog, session):
     assert "✅ Raw trending video transformed successfully into youtube_trending_test_db" == caplog.records[0].message
 
 if __name__ == "__main__":
-    pytest.main(["-v", "video_repository_test.py"])
+    pytest.main(["-v", "test_video_repository.py"])

@@ -25,7 +25,7 @@ class VideoService:
         self.yt_client = YoutubeApiClient(config)
         self.video_repository = VideoRepository(config)
 
-    def extract_trending_videos(self) -> None:
+    def extract_trending_videos(self) -> dict | None:
         logger.info("Extracting trending videos")
         return self.yt_client.get_trending_videos(chart="mostPopular")
 

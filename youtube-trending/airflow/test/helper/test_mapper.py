@@ -87,4 +87,4 @@ def test_map_to_video_stats_pass():
     assert video_stats.comment_count == result.comment_count
 
 if __name__ == "__main__":
-    pytest.main(["-v", "mapper_test.py"])
+    pytest.main(["-v", "test_mapper.py"])
