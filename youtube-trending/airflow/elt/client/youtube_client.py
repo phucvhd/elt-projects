@@ -11,7 +11,7 @@ class YoutubeApiClient:
         self.max_results = config.MAX_RESULTS
         self.base_url = config.BSE_URL
 
-    def get_trending_videos(self, chart: str):
+    def get_trending_videos(self, chart: str) -> dict | None:
         params = {
             "part": "snippet,statistics",
             "chart": chart,
@@ -49,7 +49,7 @@ class YoutubeApiClient:
             print(response.text)
             return None
 
-    def get_channel_info(self, channel_ids: []):
+    def get_channel_info(self, channel_ids: []) -> dict | None:
         params = {
             "part": "snippet",
             "id": channel_ids,
