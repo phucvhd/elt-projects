@@ -6,7 +6,7 @@ from elt.service.category_service import CategoryService
 from elt.service.video_service import VideoService
 
 # Load environment variables
-config = Config('dev')
+config = Config()
 
 # Init Extract service
 video_service = VideoService(config)
