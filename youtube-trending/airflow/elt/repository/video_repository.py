@@ -1,5 +1,7 @@
 import logging
+from datetime import date
 
+from sqlalchemy import Date, cast
 from sqlalchemy.dialects.postgresql import insert
 
 from elt.config.config import Config
@@ -12,7 +14,7 @@ class VideoRepository(Repository):
     def __init__(self, config: Config):
         super().__init__(config)
 
-    def load_trending_videos(self, trending_videos_response):
+    def load_trending_videos(self, trending_videos_response) -> None:
         try:
             with self.session.begin():
                 stmt = insert(RawYoutubeTrending).values(raw_json=trending_videos_response)
@@ -20,6 +22,24 @@ class VideoRepository(Repository):
             logger.info(f"✅ Data raw_youtube_trending loaded successfully into {self.dbname}")
         except Exception as e:
             logger.error("❌ Failed to load raw_youtube_trending data:", e)
+            self.session.rollback()
+            raise e
+
+    def get_raw_trending_video(self, query_date: date) -> RawYoutubeTrending | None:
+        try:
+            with self.session.begin():
+                raw_data = self.session.query(RawYoutubeTrending)\
+                    .filter(cast(RawYoutubeTrending.fetch_timestamp, Date) == query_date)\
+                    .order_by(RawYoutubeTrending.fetch_timestamp.desc())\
+                    .first()
+                if raw_data:
+                    logger.info(f"Get raw data on {raw_data.fetch_timestamp} successfully")
+                    self.session.close()
+                else:
+                    raise Exception(f"Raw data not found on date: {date}")
+            return raw_data
+        except Exception as e:
+            logger.error("❌ Failed to get raw_youtube_trending data:", e)
             self.session.rollback()
             raise e
 
