@@ -31,10 +31,10 @@ from dotenv import load_dotenv
 import os
 
 #[Begin] Load environment variables from .env file
-load_dotenv()
+load_dotenv(dotenv_path=os.getenv("ENV_PROFILE", ".env"))
 
 # Get the database connection string from the environment
-DATABASE_URL = f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@localhost:5432/{os.getenv('POSTGRES_DB')}"
+DATABASE_URL = f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@localhost:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
 
 # Set the sqlalchemy.url to the loaded DATABASE_URL
 config.set_main_option('sqlalchemy.url', DATABASE_URL)

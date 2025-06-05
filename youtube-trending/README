@@ -1,0 +1,2 @@
+./test_env.sh up    # Start and migrate
+./test_env.sh down  # Tear down
