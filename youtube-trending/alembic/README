@@ -1,1 +1,5 @@
 Generic single-database configuration.
+
+Run Alembic with profile
+- Dev: ENV_PROFILE=.env.dev alembic upgrade head
+- Test: ENV_PROFILE=.env.test alembic upgrade head
