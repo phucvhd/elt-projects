@@ -1,5 +1,5 @@
 import logging
-from datetime import date
+from datetime import date, datetime
 
 from elt.client.youtube_client import YoutubeApiClient
 from elt.config.config import Config
@@ -47,7 +47,7 @@ class VideoService:
 
     def transform_video_stats(self, raw_video_data: RawYoutubeTrending) -> None:
         logger.info("Starting to transform raw_video_data to video stats")
-        video_stats_list = list([map_to_video_stats(trending_videos_item) for trending_videos_item in raw_video_data.raw_json.get("items", [])])
+        video_stats_list = list([map_to_video_stats(trending_videos_item, raw_video_data.fetch_timestamp.date()) for trending_videos_item in raw_video_data.raw_json.get("items", [])])
         self.video_repository.load_video_stats(video_stats_list)
 
     def get_raw_trending_video(self, query_date: date) -> RawYoutubeTrending | None:

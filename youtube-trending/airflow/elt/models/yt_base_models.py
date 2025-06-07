@@ -30,7 +30,7 @@ class VideoStats(Base):
     category_id = Column(String, ForeignKey('video_categories.category_id'), nullable=False)
     channel_id = Column(String, ForeignKey('channel_infos.channel_id'), nullable=False)
     published_at = Column(TIMESTAMP, nullable=False)
-    trending_date = Column(Date, nullable=False, server_default=text('CURRENT_DATE'))
+    trending_date = Column(Date, primary_key=True, nullable=False, server_default=text('CURRENT_DATE'))
     view_count = Column(Integer, nullable=False)
     like_count = Column(Integer, nullable=False)
     comment_count = Column(Integer, nullable=False)

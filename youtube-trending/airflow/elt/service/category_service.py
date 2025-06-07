@@ -19,5 +19,5 @@ class CategoryService:
 
     def load_video_categories(self, video_categories_response):
         logger.info("Starting to load video categories into database")
-        video_categories = list([map_to_video_category(video_categories_item) for video_categories_item in video_categories_response.get("item", [])])
+        video_categories = list([map_to_video_category(video_categories_item) for video_categories_item in video_categories_response.get("items", [])])
         return self.category_repository.load_video_categories(video_categories)
