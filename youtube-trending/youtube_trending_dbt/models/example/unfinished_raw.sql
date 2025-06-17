@@ -1,0 +1,1 @@
+select ryt.id, fetch_timestamp from raw_youtube_trending ryt left join video_stats vs on ryt.fetch_timestamp::DATE = vs.trending_date where vs.trending_date is null
