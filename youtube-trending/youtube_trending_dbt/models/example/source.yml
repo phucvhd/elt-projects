@@ -8,3 +8,9 @@ sources:
     tables:
       - name: raw_youtube_trending
         description: "Raw response from Youtube Data V3"
+      - name: video_categories
+        description: "Categories by region"
+      - name: channel_infos
+        description: "Channel information"
+      - name: video_stats
+        description: "Cleaned video stats form raw response"

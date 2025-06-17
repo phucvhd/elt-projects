@@ -49,8 +49,9 @@ services:
     env_file:
       - .env
     volumes:
-      - ./airflow:/opt/airflow
-#      - ~/.dbt:/root/.dbt
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/elt:/opt/airflow/elt
+      - ./youtube_trending_dbt:/opt/airflow/youtube_trending_dbt
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       LOAD_EX: n
@@ -84,8 +85,9 @@ services:
     env_file:
       - .env
     volumes:
-      - ./airflow:/opt/airflow
-        #      - ~/.dbt:/root/.dbt
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/elt:/opt/airflow/elt
+      - ./youtube_trending_dbt:/opt/airflow/youtube_trending_dbt
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       LOAD_EX: n
