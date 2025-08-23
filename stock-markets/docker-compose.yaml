@@ -46,7 +46,7 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./airflow/dags:/opt/airflow/dags
-      - ./elt_script:/opt/airflow/elt_script
+      - ./elt:/opt/airflow/elt
       - ./stock_markets_dbt:/opt/dbt
       - ~/.dbt:/root/.dbt
       - /var/run/docker.sock:/var/run/docker.sock
@@ -81,7 +81,7 @@ services:
 #      - "host.docker.internal:host-gateway"
 #    volumes:
 #      - ./airflow/dags:/opt/airflow/dags
-#      - ./elt_script:/opt/airflow/elt_script
+#      - ./elt:/opt/airflow/elt
 #      - ./stock_markets_dbt:/opt/dbt
 #      - ~/.dbt:/root/.dbt
 #      - /var/run/docker.sock:/var/run/docker.sock
