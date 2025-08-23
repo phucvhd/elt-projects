@@ -1,7 +1,5 @@
 import logging
 
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.exc import IntegrityError
 from yfinance import Ticker
 
 from configs.base_model import StockPrice
