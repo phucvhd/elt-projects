@@ -30,10 +30,10 @@ services:
     networks:
       - yt_elt_network
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@airflow-postgres/${AIRFLOW_DB}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@${AIRFLOW_HOST}/${AIRFLOW_DB}
     command: >
       bash -c "airflow db init && 
-               airflow users create --username airflow --password password --firstname Steve --lastname Vu --role Admin --email phucvhd@gmail.com"
+               airflow users create --username \"$AIRFLOW_USER\" --password \"$AIRFLOW_PASSWORD\" --firstname Steve --lastname Vu --role Admin --email stevevu1909@gmail.com"
 
   webserver:
     build:
@@ -57,8 +57,8 @@ services:
       LOAD_EX: n
       EXECUTOR: Local
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@airflow-postgres/${AIRFLOW_DB}
-      AIRFLOW_CONN_DESTINATION_POSTGRES: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@youtube_trending_postgres:5432/${POSTGRES_DB}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@${AIRFLOW_HOST}/${AIRFLOW_DB}
+      AIRFLOW_CONN_DESTINATION_POSTGRES: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CON_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: plIipb9RU3-3wJ1UNaAtqVNJrqFEks1-dGbJM34EW7U=
       AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME: ${AIRFLOW_USER}
       AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD: ${AIRFLOW_PASSWORD}
@@ -93,8 +93,8 @@ services:
       LOAD_EX: n
       EXECUTOR: Local
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@airflow-postgres/${AIRFLOW_DB}
-      AIRFLOW_CONN_DESTINATION_POSTGRES: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@youtube_trending_postgres:5432/${POSTGRES_DB}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@${AIRFLOW_HOST}/${AIRFLOW_DB}
+      AIRFLOW_CONN_DESTINATION_POSTGRES: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CON_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       AIRFLOW__CORE__FERNET_KEY: plIipb9RU3-3wJ1UNaAtqVNJrqFEks1-dGbJM34EW7U=
       AIRFLOW__WEBSERVER__DEFAULT_USER_USERNAME: ${AIRFLOW_USER}
       AIRFLOW__WEBSERVER__DEFAULT_USER_PASSWORD: ${AIRFLOW_PASSWORD}

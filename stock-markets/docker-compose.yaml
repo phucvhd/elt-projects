@@ -31,7 +31,7 @@ services:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
     command: >
       bash -c "airflow db init && 
-               airflow users create --username airflow --password password --firstname Steve --lastname Vu --role Admin --email stevevu@example.com"
+               airflow users create --username airflow --password password --firstname Steve --lastname Vu --role Admin --email stevevu1909@gmail.com"
 
   webserver:
     build:

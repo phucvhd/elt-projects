@@ -4,7 +4,7 @@ from datetime import date, datetime
 from elt.client.youtube_client import YoutubeApiClient
 from elt.config.config import Config
 from elt.helper.mapper import map_to_channel_info, map_to_video_stats
-from elt.models.yt_base_models import RawYoutubeTrending
+from elt.models.yt_base_models import RawYoutubeTrending, VideoStats, ChannelInfo
 from elt.repository.video_repository import VideoRepository
 
 
@@ -36,21 +36,39 @@ class VideoService:
         channel_ids = extract_channel_id(raw_video_data)
         return self.yt_client.get_channel_info(channel_ids)
 
+    def transform_to_video_stats(self, raw_video_data: RawYoutubeTrending) -> list[VideoStats]:
+        logger.info("Starting to transform raw trending videos to video stats")
+        try:
+            return list([map_to_video_stats(trending_videos_item, raw_video_data.fetch_timestamp.date()) for
+                         trending_videos_item in raw_video_data.raw_json.get("items", [])])
+        except Exception as e:
+            logger.error("Error when transform raw trending videos to video stats")
+            raise e
+
+    def transform_to_channel_infos(self, channel_info_response: dict) -> list[ChannelInfo]:
+        logger.info("Starting to transform channel info response to channel info")
+        try:
+            return list([map_to_channel_info(channel_info_item) for channel_info_item in channel_info_response.get("items", [])])
+        except Exception as e:
+            logger.error("Error when transform channel info response to channel info")
+            raise e
+
     def load_trending_videos(self, trending_videos_response: dict) -> None:
         logger.info("Starting to load raw trending videos into database")
-        self.video_repository.load_trending_videos(trending_videos_response)
+        try:
+            return self.video_repository.load_trending_videos(trending_videos_response)
+        except Exception as e:
+            logger.error("Error when loading raw trending videos into database")
+            raise e
 
-    def load_channel_info(self, channel_info_response: dict) -> None:
+    def load_channel_info(self, channel_infos: list[ChannelInfo]) -> None:
         logger.info("Starting to load channel infos into database")
-        channel_infos = list([map_to_channel_info(channel_info_item) for channel_info_item in channel_info_response.get("items", [])])
-        self.video_repository.load_channel_info(channel_infos)
-
-    def transform_video_stats(self, raw_video_data: RawYoutubeTrending) -> None:
-        logger.info("Starting to transform raw_video_data to video stats")
-        video_stats_list = list([map_to_video_stats(trending_videos_item, raw_video_data.fetch_timestamp.date()) for trending_videos_item in raw_video_data.raw_json.get("items", [])])
-        self.video_repository.load_video_stats(video_stats_list)
+        try:
+            return self.video_repository.load_channel_info(channel_infos)
+        except Exception as e:
+            logger.error("Error when loading channel infos into database")
+            raise e
 
     def get_raw_trending_video(self, query_date: date) -> RawYoutubeTrending | None:
         logger.info(f"Starting to get raw_trending_video on {query_date}")
         return self.video_repository.get_raw_trending_video(query_date)
-
