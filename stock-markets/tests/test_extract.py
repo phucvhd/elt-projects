@@ -1,4 +1,4 @@
-from configs.yahoo_finance_client import YahooFinanceClient
+from elt.configs.yahoo_finance_client import YahooFinanceClient
 from elt.extract import Extract
 from tests.test_config import TestConfig
 
@@ -6,6 +6,10 @@ test_config = TestConfig()
 client = YahooFinanceClient(test_config.config)
 extract = Extract(client)
 ticker = client.fetch_ticker("AAPL")
+
+def test_extract_ticker():
+    df = extract.extract_ticker("AAPL")
+    assert df is not None
 
 def test_extract_stock_data_by_period():
     df = extract.extract_stock_prices_by_period(ticker)

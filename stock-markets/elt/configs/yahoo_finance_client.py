@@ -2,7 +2,7 @@ import yfinance as yf
 from pandas.core.frame import DataFrame
 from yfinance import Ticker
 
-from configs.config import Config
+from elt.configs.config import Config
 
 class YahooFinanceClient:
     def __init__(self, config: Config):
@@ -13,7 +13,7 @@ class YahooFinanceClient:
             return yf.Ticker(ticker)
         except Exception as e:
             print(f"Error when fetch ticker: {ticker}", e)
-            exit(1)
+            raise e
 
     def fetch_stock_prices_by_period(self, ticker: Ticker, period=None, interval=None) -> DataFrame:
         try:
@@ -26,7 +26,7 @@ class YahooFinanceClient:
             return df
         except Exception as e:
             print("Error when fetch stock data", e)
-            exit(1)
+            raise e
 
     def fetch_stock_prices_by_date(self, ticker: Ticker, start, end) -> DataFrame:
         try:
@@ -36,4 +36,4 @@ class YahooFinanceClient:
             return df
         except Exception as e:
             print("Error when fetch stock data", e)
-            exit(1)
+            raise e

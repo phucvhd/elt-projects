@@ -1,5 +1,5 @@
-from configs.repository import Repository
-from configs.yahoo_finance_client import YahooFinanceClient
+from elt.configs.repository import Repository
+from elt.configs.yahoo_finance_client import YahooFinanceClient
 from elt.extract import Extract
 from elt.load import Load
 from elt.transform import Transform

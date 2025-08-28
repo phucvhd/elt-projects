@@ -1,5 +1,5 @@
-from sqlalchemy import Column, func, Integer, String, BigInteger, Text, DateTime, Float, ForeignKey
-from sqlalchemy.dialects.postgresql import JSON, TIMESTAMP
+from sqlalchemy import Column, Integer, String, BigInteger, Text, DateTime, Float, ForeignKey
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()

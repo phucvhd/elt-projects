@@ -2,7 +2,7 @@ from abc import abstractmethod
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from configs.config import Config
+from elt.configs.config import Config
 
 
 class Repository:

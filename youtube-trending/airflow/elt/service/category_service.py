@@ -14,7 +14,7 @@ class CategoryService:
         self.yt_client = YoutubeApiClient(config)
         self.category_repository = CategoryRepository(config)
 
-    def extract_video_categories(self):
+    def extract_video_categories(self) -> dict | None:
         logger.info("Starting to extract video categories")
         try:
             return self.yt_client.get_video_categories()

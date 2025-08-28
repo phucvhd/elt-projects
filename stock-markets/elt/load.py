@@ -2,9 +2,9 @@ import logging
 
 from yfinance import Ticker
 
-from configs.base_model import StockPrice
-from configs.mapper import Mapper
-from configs.repository import Repository
+from elt.configs.base_model import StockPrice, TickerInfo
+from elt.configs.mapper import Mapper
+from elt.configs.repository import Repository
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +27,20 @@ class Load:
                 self.repository.session.commit()
         except Exception as e:
             if 'unique constraint' not in str(e.args):
-                print(f"Error when load ticker: {ticker.ticker}", e)
+                print(f"Error when loading ticker: {ticker.ticker}", e)
                 self.repository.session.rollback()
-                exit(1)
+                raise e
+
+    def load_ticker_info(self, ticker_info: TickerInfo):
+        try:
+            print(f"Loading ticker info from ticker: {ticker_info.symbol}")
+            with self.repository.session.begin():
+                self.repository.session.merge(ticker_info)
+                self.repository.session.commit()
+        except Exception as e:
+            print(f"Error when loading ticker: {ticker_info.symbol}", e)
+            self.repository.session.rollback()
+            raise e
 
     def load_stock_prices(self, data: list[StockPrice]):
         try:
@@ -41,6 +52,6 @@ class Load:
         except Exception as e:
             print(f"Failed to load stock price into database", e)
             if 'unique constraint' not in str(e.args):
-                print(f"Error when load stock price", e)
+                print(f"Error when loading stock price", e)
                 self.repository.session.rollback()
-                exit(1)
+                raise e
