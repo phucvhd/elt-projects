@@ -1,9 +1,7 @@
 import sys
 from datetime import datetime
 
-from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.providers.standard.operators.bash import BashOperator
-from docker.types import Mount
 
 from airflow import DAG
 
@@ -21,7 +19,7 @@ dag = DAG(
     'Daily_DBT',
     default_args=default_args,
     description='Daily_DBT',
-    start_date=datetime(2025, 6, 12),
+    start_date=datetime.today(),
     schedule=None,
     catchup=False,
 )

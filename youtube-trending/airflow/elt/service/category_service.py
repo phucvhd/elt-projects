@@ -14,10 +14,10 @@ class CategoryService:
         self.yt_client = YoutubeApiClient(config)
         self.category_repository = CategoryRepository(config)
 
-    def extract_video_categories(self) -> dict | None:
+    def extract_video_categories(self):
         logger.info("Starting to extract video categories")
         try:
-            return self.yt_client.get_video_categories()
+            return self.yt_client.fetch_video_categories()
         except Exception as e:
             logger.error("Failed to extract video categories", e)
             raise e

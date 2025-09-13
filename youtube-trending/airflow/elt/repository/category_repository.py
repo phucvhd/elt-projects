@@ -11,11 +11,14 @@ class CategoryRepository(Repository):
         super().__init__(config)
 
     def load_video_categories(self, video_categories: list[VideoCategory]) -> None:
+        session = self.get_session()
         try:
-            with self.session.begin():
-                [self.session.merge(video_category) for video_category in video_categories]
+            with session.begin():
+                [session.merge(video_category) for video_category in video_categories]
             logger.info(f"✅ Data video_categories_lookup loaded successfully into {self.dbname}")
         except Exception as e:
             logger.error("❌ Failed to load video_categories_lookup data:", e)
-            self.session.rollback()
+            session.rollback()
             raise e
+        finally:
+            session.close()
