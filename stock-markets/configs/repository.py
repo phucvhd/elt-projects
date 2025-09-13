@@ -1,13 +1,9 @@
 from abc import abstractmethod
-
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from configs.config import Config
 
-from elt.config.config import Config
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 class Repository:
     @abstractmethod
@@ -19,7 +15,13 @@ class Repository:
         self.dbname = config.DBNAME
         self.POSTGRES_ENGINE_URL = f'postgresql+psycopg2://{config.USERNAME}:{config.PASSWORD}@{config.HOST}:{config.PORT}/{config.DBNAME}'
         self.engine = create_engine(self.POSTGRES_ENGINE_URL)
-    
-    def get_session(self):
-        logger.info(f"Creating database session")
-        return Session(self.engine)
+        self.session = Session(self.engine)
+
+    def check_postgres_connection(self) -> bool:
+        try:
+            with self.engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+            return True
+        except SQLAlchemyError as e:
+            print(f"Database connection failed: {e}")
+            return False

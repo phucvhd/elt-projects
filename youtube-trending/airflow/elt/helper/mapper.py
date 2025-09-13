@@ -1,6 +1,7 @@
+import time
 from datetime import date
 
-from elt.models.yt_base_models import ChannelInfo, VideoCategory, VideoStats
+from elt.models.yt_base_models import ChannelInfo, VideoCategory, VideoStats, ChannelStatistics
 
 
 def map_to_channel_info(channel_info_item) -> ChannelInfo:
@@ -24,3 +25,9 @@ def map_to_video_stats(trending_videos_item, trending_date: date) -> VideoStats:
                       view_count=trending_videos_item["statistics"]["viewCount"] if 'viewCount' in trending_videos_item['statistics'] else 0,
                       like_count=trending_videos_item["statistics"]["likeCount"] if 'likeCount' in trending_videos_item['statistics'] else 0,
                       comment_count=trending_videos_item["statistics"]["commentCount"] if 'commentCount' in trending_videos_item['statistics'] else 0)
+
+def map_to_channel_statistics(channel_statistics_item: dict) -> ChannelStatistics:
+    return ChannelStatistics(channel_id=channel_statistics_item["id"],
+                             view_count=channel_statistics_item["statistics"]["viewCount"] if 'viewCount' in channel_statistics_item["statistics"] else 0,
+                             video_count=channel_statistics_item["statistics"]["videoCount"] if 'videoCount' in channel_statistics_item["statistics"] else 0,
+                             subscriber_count=channel_statistics_item["statistics"]["subscriberCount"] if not channel_statistics_item["statistics"]["hiddenSubscriberCount"] else 0)

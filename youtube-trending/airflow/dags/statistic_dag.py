@@ -1,8 +1,7 @@
 import sys
 from datetime import datetime
 
-from airflow.providers.docker.operators.docker import DockerOperator
-from docker.types import Mount
+from airflow.providers.standard.operators.bash import BashOperator
 
 from airflow import DAG
 
@@ -20,59 +19,54 @@ dag = DAG(
     'Daily_DBT',
     default_args=default_args,
     description='Daily_DBT',
-    start_date=datetime(2025, 6, 12),
+    start_date=datetime.today(),
     schedule=None,
     catchup=False,
 )
 
-t1 = DockerOperator(
+t1 = BashOperator(
     task_id='dbt_trending_streak',
-    image='ghcr.io/dbt-labs/dbt-postgres:1.6.0',
-    command=[
-        "run",
-        "--select",
-        "trending_streak",
-        "--project-dir",
-        "/opt/airflow/youtube_trending_dbt",
-        "--profiles-dir",
-        "/opt/airflow/youtube_trending_dbt/",
-        "--full-refresh"
-    ],
-    mounts=[
-        Mount(
-            source='/Users/vuhoangdinhphuc/Documents/Data_engineering/elt-projects/youtube-trending/youtube_trending_dbt',
-            target='/opt/airflow/youtube_trending_dbt/',
-            type='bind'
-        )
-    ],
-    docker_url="unix://var/run/docker.sock",
-    network_mode="bridge",
+    bash_command="""
+    docker run --rm \
+    -v /Users/vuhoangdinhphuc/Documents/Data_engineering/elt-projects/youtube-trending/youtube_trending_dbt:/opt/airflow/youtube_trending_dbt \
+    --network bridge \
+    ghcr.io/dbt-labs/dbt-postgres:1.6.0 \
+    run --select trending_streak \
+    --project-dir /opt/airflow/youtube_trending_dbt \
+    --profiles-dir /opt/airflow/youtube_trending_dbt \
+    --full-refresh
+    """,
     dag=dag
 )
 
-t2 = DockerOperator(
+t2 = BashOperator(
     task_id='dbt_popular_category',
-    image='ghcr.io/dbt-labs/dbt-postgres:1.6.0',
-    command=[
-        "run",
-        "--select",
-        "popular_category",
-        "--project-dir",
-        "/opt/airflow/youtube_trending_dbt",
-        "--profiles-dir",
-        "/opt/airflow/youtube_trending_dbt/",
-        "--full-refresh"
-    ],
-    mounts=[
-        Mount(
-            source='/Users/vuhoangdinhphuc/Documents/Data_engineering/elt-projects/youtube-trending/youtube_trending_dbt',
-            target='/opt/airflow/youtube_trending_dbt/',
-            type='bind'
-        )
-    ],
-    docker_url="unix://var/run/docker.sock",
-    network_mode="bridge",
+    bash_command="""
+    docker run --rm \
+    -v /Users/vuhoangdinhphuc/Documents/Data_engineering/elt-projects/youtube-trending/youtube_trending_dbt:/opt/airflow/youtube_trending_dbt \
+    --network bridge \
+    ghcr.io/dbt-labs/dbt-postgres:1.6.0 \
+    run --select popular_category \
+    --project-dir /opt/airflow/youtube_trending_dbt \
+    --profiles-dir /opt/airflow/youtube_trending_dbt \
+    --full-refresh
+    """,
     dag=dag
 )
 
-t1 >> t2
+t3 = BashOperator(
+    task_id='dbt_top_channels',
+    bash_command="""
+    docker run --rm \
+    -v /Users/vuhoangdinhphuc/Documents/Data_engineering/elt-projects/youtube-trending/youtube_trending_dbt:/opt/airflow/youtube_trending_dbt \
+    --network bridge \
+    ghcr.io/dbt-labs/dbt-postgres:1.6.0 \
+    run --select top_channels \
+    --project-dir /opt/airflow/youtube_trending_dbt \
+    --profiles-dir /opt/airflow/youtube_trending_dbt \
+    --full-refresh
+    """,
+    dag=dag
+)
+
+t1 >> t2 >> t3

@@ -3,6 +3,7 @@ from datetime import date
 
 from elt.config.config import Config
 from elt.service.category_service import CategoryService
+from elt.service.channel_service import ChannelService
 from elt.service.video_service import VideoService
 
 # Load environment variables
@@ -11,6 +12,7 @@ config = Config()
 # Init Extract service
 video_service = VideoService(config)
 category_service = CategoryService(config)
+channel_service = ChannelService(config)
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +33,9 @@ def extract_channel_info(query_date: date):
         # load_raw_video by date
         raw_trending_video = video_service.get_raw_trending_video(query_date)
 
-        channel_info_response = video_service.extract_channel_infos(raw_trending_video)
-        video_service.load_channel_info(channel_info_response)
+        channel_info_response = channel_service.extract_channel_infos(raw_trending_video)
+        channel_infos = channel_service.transform_to_channel_infos(channel_info_response)
+        channel_service.load_channel_info(channel_infos)
         logger.info("Ending extract_channel_info .....")
     except Exception as e:
         logger.error(f"Error at extract_channel_info: ", e)
@@ -44,7 +47,7 @@ def transform_video_stats(query_date: date):
         # load_raw_video by date
         raw_trending_video = video_service.get_raw_trending_video(query_date)
 
-        video_service.transform_video_stats(raw_trending_video)
+        video_service.transform_to_video_stats(raw_trending_video)
         logger.info("Ending transform_video_stats .....")
     except Exception as e:
         logger.error(f"Error at transform_video_stats: ", e)
@@ -54,11 +57,38 @@ def transform_video_stats(query_date: date):
 def extract_video_categories():
     logger.info("Starting extract_video_categories .....")
     try:
-        logger.info("Extracting video_categories .....")
         video_categories_response = category_service.extract_video_categories()
-        logger.info("Loading video_categories .....")
-        category_service.load_video_categories(video_categories_response)
-        logger.info("Ending extract_video_categories .....")
+        categories = category_service.transform_to_video_categories(video_categories_response)
+        category_service.load_video_categories(categories)
     except Exception as e:
         logger.error(f"Error at extract_video_categories: ", e)
         exit(1)
+
+def extract_channel_info_from_ids(channel_ids: []):
+    logger.info("Starting extract_channel_info_from_ids .....")
+    logger.info(f"Received channel_ids: {channel_ids}")
+    try:
+        # check if ids exits
+        checked_ids = channel_service.check_channel_infos_is_existed(channel_ids)
+        if len(checked_ids[1]) > 0:
+            logger.info(f"Extracting {len(checked_ids[1])} channel info(s) not in db")
+            channel_info_response = channel_service.extract_channel_infos_from_ids(checked_ids[1])
+            channel_infos = channel_service.transform_to_channel_infos(channel_info_response)
+            channel_service.load_channel_info(channel_infos)
+        else:
+            logger.info(f"Channel info(s) exited, skip extract_channel_info_from_ids")
+    except Exception as e:
+        logger.error(f"Error at extract_channel_info_from_ids: ", e)
+        exit(1)
+
+def extract_channel_statistics(channel_ids: []):
+    logger.info("Starting extract_channel_statistics .....")
+    logger.info(f"Received channel_ids: {channel_ids}")
+    try:
+        channel_statistics_response = channel_service.extract_channel_statistics(channel_ids)
+        channel_statistics = channel_service.transform_to_channel_statistics(channel_statistics_response)
+        channel_service.load_channel_statistics(channel_statistics)
+    except Exception as e:
+        logger.error(f"Error at extract_channel_statistics: ", e)
+        exit(1)
+

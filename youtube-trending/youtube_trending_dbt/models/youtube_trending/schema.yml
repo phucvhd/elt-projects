@@ -30,3 +30,12 @@ models:
           description: "Number of video counted by category"
           data_tests:
               - not_null
+  - name: top_channels
+    description: "Channels of top trending videos"
+    columns:
+      - name: channel_id
+        data_tests:
+          - not_null
+      - name: channel_title
+        data_tests:
+          - not_null

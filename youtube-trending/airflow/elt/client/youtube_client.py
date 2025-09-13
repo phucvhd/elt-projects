@@ -9,9 +9,9 @@ class YoutubeApiClient:
         self.api_key = config.API_KEY
         self.region_code = config.REGION_CODE
         self.max_results = config.MAX_RESULTS
-        self.base_url = config.BSE_URL
+        self.base_url = config.BASE_URL
 
-    def get_trending_videos(self, chart: str) -> dict | None:
+    def fetch_trending_videos(self, chart: str) -> dict | None:
         params = {
             "part": "snippet,statistics",
             "chart": chart,
@@ -32,7 +32,7 @@ class YoutubeApiClient:
             print(response.text)
             return None
 
-    def get_video_categories(self):
+    def fetch_video_categories(self):
         params = {
             "part": "snippet",
             "regionCode": self.region_code,
@@ -47,9 +47,9 @@ class YoutubeApiClient:
                 time.sleep(60)  # or longer depending on your quota window
             print(f"Error from get_video_categories: {response.status_code}")
             print(response.text)
-            return None
+            exit(1)
 
-    def get_channel_info(self, channel_ids: []) -> dict | None:
+    def fetch_channel_infos(self, channel_ids: []) -> dict | None:
         params = {
             "part": "snippet",
             "id": channel_ids,
@@ -65,4 +65,22 @@ class YoutubeApiClient:
                 time.sleep(60)  # or longer depending on your quota window
             print(f"Error from get_channel_info: {response.status_code}")
             print(response.text)
-            return None
+            exit(1)
+
+    def fetch_channel_statistics(self, channel_ids: []) -> dict | None:
+        params = {
+            "part": "statistics",
+            "id": channel_ids,
+            "key": self.api_key
+        }
+        response = requests.get(self.base_url + "channels", params=params)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            if response.status_code == 429:
+                print("Rate limit hit, sleeping...")
+                time.sleep(60)  # or longer depending on your quota window
+            print(f"Error from get_channel_info: {response.status_code}")
+            print(response.text)
+            exit(1)
