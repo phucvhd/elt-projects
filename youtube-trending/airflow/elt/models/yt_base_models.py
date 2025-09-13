@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, JSON, TIMESTAMP, func, Text, String, Date, ForeignKey, text
+from sqlalchemy import Column, Integer, JSON, TIMESTAMP, func, Text, String, Date, ForeignKey, text, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -37,4 +37,12 @@ class VideoStats(Base):
     channel_infos = relationship("ChannelInfo")
     video_categories = relationship("VideoCategory")
 
-
+class ChannelStatistics(Base):
+    __tablename__ = 'channel_statistics'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    channel_id = Column(String, ForeignKey('channel_infos.channel_id'), nullable=False)
+    fetch_timestamp = Column(TIMESTAMP, server_default=func.now())
+    view_count = Column(BigInteger)
+    video_count = Column(BigInteger)
+    subscriber_count = Column(BigInteger, nullable=True)
+    channel_infos = relationship("ChannelInfo")

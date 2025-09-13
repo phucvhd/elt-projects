@@ -29,12 +29,12 @@ class VideoService:
 
     def extract_trending_videos(self) -> dict | None:
         logger.info("Extracting trending videos")
-        return self.yt_client.get_trending_videos(chart="mostPopular")
+        return self.yt_client.fetch_trending_videos(chart="mostPopular")
 
     def extract_channel_infos(self, raw_video_data: RawYoutubeTrending) -> dict | None:
         logger.info("Extracting channel infos")
         channel_ids = extract_channel_id(raw_video_data)
-        return self.yt_client.get_channel_info(channel_ids)
+        return self.yt_client.fetch_channel_infos(channel_ids)
 
     def transform_to_video_stats(self, raw_video_data: RawYoutubeTrending) -> list[VideoStats]:
         logger.info("Starting to transform raw trending videos to video stats")
@@ -45,28 +45,12 @@ class VideoService:
             logger.error("Error when transform raw trending videos to video stats")
             raise e
 
-    def transform_to_channel_infos(self, channel_info_response: dict) -> list[ChannelInfo]:
-        logger.info("Starting to transform channel info response to channel info")
-        try:
-            return list([map_to_channel_info(channel_info_item) for channel_info_item in channel_info_response.get("items", [])])
-        except Exception as e:
-            logger.error("Error when transform channel info response to channel info")
-            raise e
-
     def load_trending_videos(self, trending_videos_response: dict) -> None:
         logger.info("Starting to load raw trending videos into database")
         try:
             return self.video_repository.load_trending_videos(trending_videos_response)
         except Exception as e:
             logger.error("Error when loading raw trending videos into database")
-            raise e
-
-    def load_channel_info(self, channel_infos: list[ChannelInfo]) -> None:
-        logger.info("Starting to load channel infos into database")
-        try:
-            return self.video_repository.load_channel_info(channel_infos)
-        except Exception as e:
-            logger.error("Error when loading channel infos into database")
             raise e
 
     def get_raw_trending_video(self, query_date: date) -> RawYoutubeTrending | None:

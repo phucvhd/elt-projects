@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 
 from elt.config.config import Config
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Repository:
     @abstractmethod
@@ -16,4 +19,7 @@ class Repository:
         self.dbname = config.DBNAME
         self.POSTGRES_ENGINE_URL = f'postgresql+psycopg2://{config.USERNAME}:{config.PASSWORD}@{config.HOST}:{config.PORT}/{config.DBNAME}'
         self.engine = create_engine(self.POSTGRES_ENGINE_URL)
-        self.session = Session(self.engine)
+    
+    def get_session(self):
+        logger.info(f"Creating database session")
+        return Session(self.engine)
