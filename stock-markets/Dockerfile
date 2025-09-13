@@ -1,0 +1,10 @@
+# Use the official Airflow image as the base
+FROM apache/airflow:latest
+
+# Install the Docker provider for Airflow
+RUN pip install apache-airflow-providers-docker apache-airflow-providers-standard
+
+# Install the required packages for the elt module
+RUN pip install python-dotenv yfinance pandas psycopg2-binary sqlalchemy
+
+WORKDIR /opt/airflow

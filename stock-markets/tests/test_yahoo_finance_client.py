@@ -1,4 +1,4 @@
-from configs.yahoo_finance_client import YahooFinanceClient
+from elt.configs.yahoo_finance_client import YahooFinanceClient
 from tests.test_config import TestConfig
 
 test_config = TestConfig()
