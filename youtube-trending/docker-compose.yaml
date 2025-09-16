@@ -1,5 +1,39 @@
 version: '3.8'
 
+# Common configuration for all Airflow services
+x-airflow-common: &airflow-common
+  image: apache/airflow:3.0.6
+  networks:
+    - yt_elt_network
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@${AIRFLOW_HOST}/${AIRFLOW_DB}
+#    PYTHONPATH: /opt/airflow/elt:/opt/airflow
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_HOST: ${POSTGRES_HOST}
+    POSTGRES_PORT: ${POSTGRES_PORT}
+    POSTGRES_DB: ${POSTGRES_DB}
+    GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+    GOOGLE_DATA_V3_URL: ${GOOGLE_DATA_V3_URL}
+    REGION_CODE: ${REGION_CODE}
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/elt:/opt/airflow/elt
+    - ./youtube_trending_dbt:/opt/dbt
+    - /var/run/docker.sock:/var/run/docker.sock
+  user: "root"
+  depends_on: &airflow-common-depends-on
+    airflow-postgres:
+      condition: service_healthy
+
 services:
   youtube_trending_postgres:
     image: postgres:latest
@@ -13,6 +47,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
+      start_period: 5s
 
   airflow-postgres: # This is the PostgreSQL database for Airflow, storing the metadata
     image: postgres:latest
@@ -22,34 +61,91 @@ services:
       POSTGRES_USER: ${AIRFLOW_USER}
       POSTGRES_PASSWORD: ${AIRFLOW_PASSWORD}
       POSTGRES_DB: ${AIRFLOW_DB}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${AIRFLOW_DB}" ]
+      interval: 10s
+      retries: 5
+      start_period: 5s
 
-  init-airflow:
-      image: apache/airflow:latest
-      user: root
-      ports:
-        - "8080:8080"
-      depends_on:
-        - airflow-postgres
-      networks:
-        - yt_elt_network
-      volumes:
-        - ./airflow/dags:/opt/airflow/dags
-        - ./airflow/elt:/opt/airflow/elt
-        - ./youtube_trending_dbt:/opt/dbt
-        - /var/run/docker.sock:/var/run/docker.sock
-      environment:
-        AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@${AIRFLOW_HOST}/${AIRFLOW_DB}
-        PYTHONPATH: /opt/airflow/elt:/opt/airflow
-        POSTGRES_USER: ${POSTGRES_USER}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-        POSTGRES_HOST: ${POSTGRES_HOST}
-        POSTGRES_PORT: ${POSTGRES_PORT}
-        POSTGRES_DB: ${POSTGRES_DB}
-        GOOGLE_API_KEY: ${GOOGLE_API_KEY}
-        GOOGLE_DATA_V3_URL: ${GOOGLE_DATA_V3_URL}
-        REGION_CODE: ${REGION_CODE}
-      command: >
-        bash -c "airflow db migrate && airflow standalone"
+  #  Airflow api-server
+  airflow-apiserver:
+    <<: *airflow-common
+    command: api-server
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/v2/version" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  # Airflow Scheduler
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8974/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  # Airflow Initialization
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - exec /entrypoint airflow version
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-admin}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-admin123}
+      _AIRFLOW_WWW_USER_EMAIL: ${_AIRFLOW_WWW_USER_EMAIL:-admin@example.com}
+      _AIRFLOW_WWW_USER_FIRSTNAME: ${_AIRFLOW_WWW_USER_FIRSTNAME:-Admin}
+      _AIRFLOW_WWW_USER_LASTNAME: ${_AIRFLOW_WWW_USER_LASTNAME:-User}
+    user: "root"
+
+#  init-airflow:
+#      image: apache/airflow:latest
+#      user: root
+#      ports:
+#        - "8080:8080"
+#      depends_on:
+#        - airflow-postgres
+#      networks:
+#        - yt_elt_network
+#      volumes:
+#        - ./airflow/dags:/opt/airflow/dags
+#        - ./airflow/elt:/opt/airflow/elt
+#        - ./youtube_trending_dbt:/opt/dbt
+#        - /var/run/docker.sock:/var/run/docker.sock
+#      environment:
+#        AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@${AIRFLOW_HOST}/${AIRFLOW_DB}
+#        PYTHONPATH: /opt/airflow/elt:/opt/airflow
+#        POSTGRES_USER: ${POSTGRES_USER}
+#        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#        POSTGRES_HOST: ${POSTGRES_HOST}
+#        POSTGRES_PORT: ${POSTGRES_PORT}
+#        POSTGRES_DB: ${POSTGRES_DB}
+#        GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+#        GOOGLE_DATA_V3_URL: ${GOOGLE_DATA_V3_URL}
+#        REGION_CODE: ${REGION_CODE}
+#      command: >
+#        bash -c "airflow db migrate && airflow standalone"
 
 networks:
   yt_elt_network:
