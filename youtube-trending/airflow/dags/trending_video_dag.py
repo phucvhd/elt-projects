@@ -23,6 +23,7 @@ dag = DAG(
     description='An ELT workflow',
     start_date=datetime.today(),
     catchup=False,
+    schedule="0 0 * * *"
 )
 
 t1 = PythonOperator(
