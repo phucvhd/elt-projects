@@ -7,7 +7,7 @@ from airflow.sdk import Param
 from airflow.sdk.definitions.param import ParamsDict
 
 from airflow import DAG
-from elt.yt_videos import extract_channel_statistics, extract_channel_info_from_ids
+from elt.yt_videos import extract_channel_statistics, extract_channel_info_from_ids, extract_top_channel_statistics
 
 default_args = {
     'owner': 'airflow',
@@ -20,14 +20,14 @@ def fail_task():
     sys.exit(1)
 
 def extract_top_channel_statistics_task():
-    extract_channel_statistics(channel_ids)
+    extract_top_channel_statistics()
 
 dag = DAG(
-    'Channel_Metrics',
+    'Daily_Channel_Metrics',
     default_args=default_args,
-    description='Channel metrics',
+    description='Daily channel metrics',
     start_date=datetime.today(),
-    schedule=None,
+    schedule="0 0 * * *",
     catchup=False
 )
 
@@ -47,8 +47,8 @@ t1 = BashOperator(
 )
 
 t2 = PythonOperator(
-    task_id='extract_channel_statistics',
-    python_callable=extract_channel_statistics_task,
+    task_id='extract_top_channel_statistics_task',
+    python_callable=extract_top_channel_statistics_task,
     dag=dag,
 )
 
