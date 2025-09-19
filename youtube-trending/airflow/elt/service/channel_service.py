@@ -80,6 +80,17 @@ class ChannelService:
             logger.error("Error when loading channel statistics into database", e)
             exit(1)
 
+    def get_top_channel_ids(self) -> list[str] | None:
+        logger.info("Starting to get top channel ids")
+        try:
+            channel_ids = self.channel_repository.get_top_channel_ids()
+            if not channel_ids:
+                raise Exception("No id found")
+            return channel_ids
+        except Exception as e:
+            logger.error("Error when getting top channel ids", e)
+            exit(1)
+
     def check_channel_infos_is_existed(self, channel_ids: list) -> tuple:
         logger.info("Starting to get channel info by provided ids")
         ids_not_exits = []
