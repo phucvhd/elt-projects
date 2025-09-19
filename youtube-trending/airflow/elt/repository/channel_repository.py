@@ -1,8 +1,11 @@
 import logging
 
+from sqlalchemy import inspect, Table, MetaData
+
 from elt.config.config import Config
 from elt.models.yt_base_models import ChannelInfo, ChannelStatistics
 from elt.repository.repository import Repository
+from test.unit.test_video_repository import session
 
 logger = logging.getLogger(__name__)
 
@@ -48,3 +51,22 @@ class ChannelRepository(Repository):
             raise e
         finally:
             session.close()
+    #
+    # def get_top_channel_infos(self):
+    #     session = self.get_session()
+    #     try:
+    #         if self.check_table_exits("top_channels"):
+    #             top_channels_table = Table("top_channels", MetaData(), autoload_with=self.engine)
+    #             with session.begin():
+    #                 rows = session.query(top_channels_table).value("channel_id")
+    #             return [rows]
+    #
+    #
+    #
+    # def check_table_exits(self, table_name: str):
+    #     try:
+    #         inspector = inspect(self.engine)
+    #         return inspector.has_table(table_name)
+    #     except Exception as e:
+    #         logger.error("❌ Failed to check table existence", e)
+    #         raise e

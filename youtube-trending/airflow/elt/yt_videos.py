@@ -1,6 +1,8 @@
 import logging
 from datetime import date
 
+from dbt.cli.params import empty
+
 from elt.config.config import Config
 from elt.service.category_service import CategoryService
 from elt.service.channel_service import ChannelService
@@ -83,8 +85,10 @@ def extract_channel_info_from_ids(channel_ids: []):
 
 def extract_channel_statistics(channel_ids: []):
     logger.info("Starting extract_channel_statistics .....")
-    logger.info(f"Received channel_ids: {channel_ids}")
     try:
+        if channel_ids is empty:
+            raise Exception("Please provide at least 1 channel id")
+        logger.info(f"Received channel_ids: {channel_ids}")
         channel_statistics_response = channel_service.extract_channel_statistics(channel_ids)
         channel_statistics = channel_service.transform_to_channel_statistics(channel_statistics_response)
         channel_service.load_channel_statistics(channel_statistics)
@@ -92,3 +96,11 @@ def extract_channel_statistics(channel_ids: []):
         logger.error(f"Error at extract_channel_statistics: ", e)
         exit(1)
 
+def extract_top_channel_statistics():
+    logger.info("Starting extract_channel_statistics .....")
+    logger.info(f"Receiving channel_ids ...")
+    try:
+        extract_channel_statistics([])
+    except Exception as e:
+        logger.error(f"Error at extract_channel_statistics: ", e)
+        exit(1)

@@ -1,6 +1,7 @@
 import sys
 from datetime import datetime
 
+from airflow.providers.standard.operators.bash import BashOperator
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.sdk import Param
 from airflow.sdk.definitions.param import ParamsDict
@@ -18,12 +19,7 @@ default_args = {
 def fail_task():
     sys.exit(1)
 
-def extract_channel_info_task(**context):
-    channel_ids = context["params"]["channel_ids"]
-    extract_channel_info_from_ids(channel_ids)
-
-def extract_channel_statistics_task(**context):
-    channel_ids = context["params"]["channel_ids"]
+def extract_top_channel_statistics_task():
     extract_channel_statistics(channel_ids)
 
 dag = DAG(
@@ -32,16 +28,22 @@ dag = DAG(
     description='Channel metrics',
     start_date=datetime.today(),
     schedule=None,
-    catchup=False,
-    params=ParamsDict({
-        "channel_ids": Param(type="array", items={"type": "string"})
-    })
+    catchup=False
 )
 
-t1 = PythonOperator(
-    task_id='extract_channel_info',
-    python_callable=extract_channel_info_task,
-    dag=dag,
+t1 = BashOperator(
+    task_id='dbt_top_channels',
+    bash_command="""
+    docker run --rm \
+    -v /Users/vuhoangdinhphuc/Documents/Data_engineering/elt-projects/youtube-trending/youtube_trending_dbt:/opt/airflow/youtube_trending_dbt \
+    --network bridge \
+    ghcr.io/dbt-labs/dbt-postgres:1.6.0 \
+    run --select top_channels \
+    --project-dir /opt/airflow/youtube_trending_dbt \
+    --profiles-dir /opt/airflow/youtube_trending_dbt \
+    --full-refresh
+    """,
+    dag=dag
 )
 
 t2 = PythonOperator(

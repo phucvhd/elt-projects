@@ -23,8 +23,8 @@ services:
       POSTGRES_PASSWORD: ${AIRFLOW_PASSWORD}
       POSTGRES_DB: ${AIRFLOW_DB}
 
-  init-airflow:
-      image: apache/airflow:latest
+  airflow-standalone:
+      image: apache/airflow:3.0.6
       user: root
       ports:
         - "8080:8080"
