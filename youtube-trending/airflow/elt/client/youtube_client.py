@@ -1,8 +1,11 @@
+import logging
+
 import requests
 import time
 
 from elt.config.config import Config
 
+logger = logging.getLogger(__name__)
 
 class YoutubeApiClient:
     def __init__(self, config: Config):
@@ -26,10 +29,10 @@ class YoutubeApiClient:
             return response.json()
         else:
             if response.status_code == 429:
-                print("Rate limit hit, sleeping...")
+                logger.warning("Rate limit hit, sleeping...")
                 time.sleep(60)  # or longer depending on your quota window
-            print(f"Error from get_trending_videos: {response.status_code}")
-            print(response.text)
+            logger.error(f"Error from get_trending_videos: {response.status_code}")
+            logger.error(response.text)
             return None
 
     def fetch_video_categories(self):
@@ -43,10 +46,10 @@ class YoutubeApiClient:
             return response.json()
         else:
             if response.status_code == 429:
-                print("Rate limit hit, sleeping...")
+                logger.warning("Rate limit hit, sleeping...")
                 time.sleep(60)  # or longer depending on your quota window
-            print(f"Error from get_video_categories: {response.status_code}")
-            print(response.text)
+            logger.error(f"Error from get_video_categories: {response.status_code}")
+            logger.error(response.text)
             exit(1)
 
     def fetch_channel_infos(self, channel_ids: []) -> dict | None:
@@ -61,10 +64,10 @@ class YoutubeApiClient:
             return response.json()
         else:
             if response.status_code == 429:
-                print("Rate limit hit, sleeping...")
+                logger.warning("Rate limit hit, sleeping...")
                 time.sleep(60)  # or longer depending on your quota window
-            print(f"Error from get_channel_info: {response.status_code}")
-            print(response.text)
+            logger.error(f"Error from get_channel_info: {response.status_code}")
+            logger.error(response.text)
             exit(1)
 
     def fetch_channel_statistics(self, channel_ids: []) -> dict | None:
@@ -79,8 +82,8 @@ class YoutubeApiClient:
             return response.json()
         else:
             if response.status_code == 429:
-                print("Rate limit hit, sleeping...")
+                logger.warning("Rate limit hit, sleeping...")
                 time.sleep(60)  # or longer depending on your quota window
-            print(f"Error from get_channel_info: {response.status_code}")
-            print(response.text)
+            logger.error(f"Error from get_channel_info: {response.status_code}")
+            logger.error(response.text)
             exit(1)
