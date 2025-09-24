@@ -1,3 +1,54 @@
-Test Env:
-./test_env.sh up    # Start and migrate
-./test_env.sh down  # Tear down
+📌 Project Overview
+
+This project implements an ETL (Extract, Transform, Load) pipeline to collect, process, and store YouTube video statistics for analysis. It automates the flow of data from the YouTube Data API into a structured database, enabling efficient tracking and insights into channel and video performance.
+
+The long-term vision is to leverage this data for machine learning–driven analysis to support decision making, such as predicting video performance, audience engagement, or optimal posting strategies.
+
+⸻
+
+⚙️ Pipeline Architecture
+	1.	Extract
+	•	Retrieve YouTube video and channel statistics using the YouTube Data API.
+	•	Collect metrics such as:
+	•	Views
+	•	Likes
+	•	Comments
+	•	Subscribers
+	•	Video count
+	2.	Transform
+	•	Clean and normalize raw API data.
+	•	Compute additional KPIs (e.g., engagement rate, average views per subscriber, growth trends).
+	•	Handle missing or inconsistent data.
+	3.	Load
+	•	Store processed data into AWS S3 for centralized data lake storage.
+	•	Load curated data from S3 into PostgreSQL for structured querying and analytics.
+	•	Maintain historical records for trend analysis.
+
+⸻
+
+🛠️ Tech Stack
+	•	Python: Core ETL scripts
+	•	YouTube Data API: Data source
+	•	AWS S3: Data lake for raw and processed datasets
+	•	PostgreSQL: Analytics-ready database
+	•	Apache Airflow (planned): Orchestration and scheduling
+	•	dbt (planned): Data transformation and modeling
+
+⸻
+
+🚀 Features
+	•	Automated extraction of video/channel stats.
+	•	Transformation layer with derived metrics.
+	•	Storage on AWS S3 for scalability and reliability.
+	•	PostgreSQL integration for structured queries and dashboards.
+	•	Modular design for scaling to multiple channels or use cases.
+
+⸻
+
+📊 Future Work: Machine Learning Integration
+
+The next phase of this project is to integrate machine learning models for advanced insights:
+	•	Predictive analytics: Forecast views, subscribers, or engagement for upcoming videos.
+	•	Audience insights: Identify patterns in viewer behavior.
+	•	Recommendation engine: Suggest optimal upload times, video lengths, or topics.
+	•	Anomaly detection: Spot sudden drops or spikes in channel performance.
