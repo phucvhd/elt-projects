@@ -17,7 +17,7 @@ class ChannelRepository(Repository):
         try:
             with session.begin():
                 [session.merge(channel_info) for channel_info in channel_infos]
-            logger.info(f"✅ Data from channel_info loaded successfully into {self.dbname}")
+            logger.info(f"✅ {len(channel_infos)} channel_infos loaded successfully into {self.dbname}")
         except Exception as e:
             logger.error("❌ Failed to load channel_infos", e)
             session.rollback()

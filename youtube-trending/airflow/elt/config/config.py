@@ -18,3 +18,7 @@ class Config:
         self.HOST = os.getenv("POSTGRES_HOST")
         self.PORT = os.getenv("POSTGRES_PORT")
         self.DBNAME = os.getenv("POSTGRES_DB")
+        self.AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+        self.AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+        self.AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")
+        self.AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
