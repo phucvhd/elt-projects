@@ -25,10 +25,31 @@ class ChannelService:
             logger.error("❌ Error when extracting channel id from raw data", e)
             raise e
 
+    def extract_channel_id_v2(self, raw_video_data: dict) -> list | None:
+        channel_ids_list = []
+        try:
+            for channel_info in raw_video_data.get("items", []):
+                channel_id = channel_info["snippet"]["channelId"]
+                channel_ids_list.append(channel_id)
+            logger.info(f"Extracted {len(channel_ids_list)} channel ids from raw data")
+            return channel_ids_list
+        except Exception as e:
+            logger.error("❌ Error when extracting channel id from raw data", e)
+            raise e
+
     def extract_channel_infos(self, raw_video_data: RawYoutubeTrending) -> dict | None:
         logger.info("Extracting channel infos")
         channel_ids = self.extract_channel_id(raw_video_data)
         return self.yt_client.fetch_channel_infos(channel_ids)
+
+    def extract_channel_infos_v2(self, raw_video_data: dict) -> dict | None:
+        logger.info("Extracting channel infos")
+        try:
+            channel_ids = self.extract_channel_id_v2(raw_video_data)
+            return self.yt_client.fetch_channel_infos(channel_ids)
+        except Exception as e:
+            logger.error("Error when extracting channel infos", e)
+            raise e
 
     def extract_channel_infos_from_ids(self, channel_ids: []) -> dict | None:
         logger.info("Extracting channel infos from provided channel ids")
@@ -47,7 +68,7 @@ class ChannelService:
             exit(1)
 
     def transform_to_channel_infos(self, channel_info_response: dict) -> list[ChannelInfo]:
-        logger.info("Starting to transform channel info response to channel info")
+        logger.info("Starting to transform response to channel info")
         try:
             return list([map_to_channel_info(channel_info_item) for channel_info_item in
                          channel_info_response.get("items", [])])

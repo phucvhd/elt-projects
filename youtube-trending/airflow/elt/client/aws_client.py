@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, date
 
 import boto3
 from botocore.exceptions import ClientError
@@ -33,7 +33,7 @@ class AwsClient:
             logger.error("Error connecting to S3: ", e)
             raise e
 
-    def upload_raw_data(self, raw_data: dict) -> bool:
+    def upload_raw_data(self, raw_data: dict) -> None:
         temp_filename = self.create_temp_json_file(raw_data)
         try:
             s3_key = temp_filename
@@ -55,33 +55,31 @@ class AwsClient:
             logger.info(f"Uploaded dict as JSON: s3://{self.AWS_BUCKET_NAME}/{s3_key}")
 
             self.cleanup_temp_file(temp_filename)
-            return True
         except Exception as e:
             logger.error("Error uploading dict as file: ", e)
             try:
                 self.cleanup_temp_file(temp_filename)
             except:
                 pass
-            return False
+            raise e
 
     def create_temp_json_file(self, data_dict: dict, pretty_print=True, prefix="temp", suffix=".json") -> str | None:
         try:
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]
-            temp_filename = f"{prefix}_{timestamp}{suffix}"
+            s3_key = self.create_s3_key(datetime.now(), prefix, suffix)
 
-            with open(temp_filename, 'w', encoding='utf-8') as f:
+            with open(s3_key, 'w', encoding='utf-8') as f:
                 if pretty_print:
                     json.dump(data_dict, f, indent=2, ensure_ascii=False)
                 else:
                     json.dump(data_dict, f, ensure_ascii=False)
 
-            self.temp_files.append(temp_filename)
+            self.temp_files.append(s3_key)
 
-            logger.info(f"Created temporary file: {temp_filename}")
-            return temp_filename
+            logger.info(f"Created temporary file: {s3_key}")
+            return s3_key
         except Exception as e:
-            logger.error("Error creating temp file: ", e)
-            return None
+            logger.error("Error when creating temp file: ", e)
+            raise e
 
     def cleanup_temp_file(self, filename: str) -> bool:
         try:
@@ -97,8 +95,16 @@ class AwsClient:
                 logger.info(f"File not found for cleanup: {filename}")
                 return False
         except Exception as e:
-            logger.error("Error cleaning up {filename}: ", e)
+            logger.error("Error when cleaning up {filename}: ", e)
             return False
+
+    def create_s3_key(self, query_date: date, prefix="temp", suffix=".json") -> str | None:
+        try:
+            timestamp = query_date.strftime('%Y%m%d_%H%M%S_%f')[:-3]
+            return f"{prefix}_{timestamp}{suffix}"
+        except Exception as e:
+            logger.error("Error when creating s3 key: ", e)
+            raise e
 
     def get_json_as_dict(self, s3_key: str) -> dict | None:
         try:
@@ -156,10 +162,11 @@ class AwsClient:
                 continuation_token = response.get('NextContinuationToken')
 
             results = [obj["Key"] for obj in matching_objects]
+            results.reverse()
 
             logger.info(f"Found {len(results)} objects with today's date pattern")
             return results
 
         except Exception as e:
-            logger.error("Error searching for today's objects: ", e)
+            logger.error("Error when searching for today's objects: ", e)
             return []

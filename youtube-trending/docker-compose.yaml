@@ -37,6 +37,8 @@ services:
         - ./airflow/elt:/opt/airflow/elt
         - ./youtube_trending_dbt:/opt/dbt
         - /var/run/docker.sock:/var/run/docker.sock
+      env_file:
+        - .env
       environment:
         AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@${AIRFLOW_HOST}/${AIRFLOW_DB}
         PYTHONPATH: /opt/airflow/elt:/opt/airflow

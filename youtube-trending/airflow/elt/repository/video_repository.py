@@ -3,6 +3,7 @@ from datetime import date
 
 from sqlalchemy import Date, cast
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
 
 from elt.config.config import Config
 from elt.repository.repository import Repository
@@ -53,7 +54,12 @@ class VideoRepository(Repository):
         session = self.get_session()
         try:
             with session.begin():
-                [session.merge(video_stats) for video_stats in video_stats_list]
+                for video_stats in video_stats_list:
+                    try:
+                        with session.begin_nested():
+                            session.merge(video_stats)
+                    except IntegrityError as ie:
+                        logger.warning(f"Skipping video_stats due to violation: {video_stats.channel_id}")
             logger.info(f"✅ Raw trending video transformed successfully into {self.dbname}")
         except Exception as e:
             logger.error("❌ Failed to transform video_stats data:", e)

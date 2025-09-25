@@ -27,13 +27,35 @@ def extract_raw_trending_video():
         logger.error(f"Error at extract_raw_trending_video: ", e)
         exit(1)
 
-def extract_channel_info(query_date: date):
-    logger.info(f"Starting extract_channel_info on date: {date} .....")
+def extract_raw_trending_video_v2():
+    logger.info("Starting extract_raw_trending_video_v2 .....")
     try:
-        # load_raw_video by date
+        trending_videos_response = video_service.extract_trending_videos()
+        video_service.load_trending_videos_to_bucket(trending_videos_response)
+        logger.info("Ending extract_raw_trending_video .....")
+    except Exception as e:
+        logger.error(f"Error at extract_raw_trending_video: ", e)
+        exit(1)
+
+def extract_channel_info(query_date: date):
+    logger.info(f"Starting extract_channel_info on date: {query_date} .....")
+    try:
         raw_trending_video = video_service.get_raw_trending_video(query_date)
 
         channel_info_response = channel_service.extract_channel_infos(raw_trending_video)
+        channel_infos = channel_service.transform_to_channel_infos(channel_info_response)
+        channel_service.load_channel_info(channel_infos)
+        logger.info("Ending extract_channel_info .....")
+    except Exception as e:
+        logger.error(f"Error at extract_channel_info: ", e)
+        exit(1)
+
+def extract_channel_info_v2(query_date: date):
+    logger.info(f"Starting extract_channel_info_v2 on date: {query_date} .....")
+    try:
+        raw_trending_video = video_service.get_raw_trending_video_from_bucket(query_date)
+
+        channel_info_response = channel_service.extract_channel_infos_v2(raw_trending_video)
         channel_infos = channel_service.transform_to_channel_infos(channel_info_response)
         channel_service.load_channel_info(channel_infos)
         logger.info("Ending extract_channel_info .....")
@@ -47,10 +69,24 @@ def transform_video_stats(query_date: date):
         # load_raw_video by date
         raw_trending_video = video_service.get_raw_trending_video(query_date)
 
-        video_service.transform_to_video_stats(raw_trending_video)
+        video_stats = video_service.transform_to_video_stats(raw_trending_video)
+        video_service.load_video_stats(video_stats)
         logger.info("Ending transform_video_stats .....")
     except Exception as e:
         logger.error(f"Error at transform_video_stats: ", e)
+        exit(1)
+
+def transform_video_stats_v2(query_date: date):
+    logger.info(f"Starting transform_video_stats_v2 on date: {query_date} .....")
+    try:
+        # load_raw_video by date
+        raw_trending_video = video_service.get_raw_trending_video_from_bucket(query_date)
+
+        video_stats = video_service.transform_to_video_stats_v2(raw_trending_video, query_date)
+        video_service.load_video_stats(video_stats)
+        logger.info("Ending transform_video_stats_v2 .....")
+    except Exception as e:
+        logger.error(f"Error at transform_video_stats_v2: ", e)
         exit(1)
 
 # Extract and Load video_categories
